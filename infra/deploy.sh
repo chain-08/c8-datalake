@@ -1,9 +1,9 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-# 1) Install Docker & Compose plugin
-apt-get update
-apt-get install -y ca-certificates curl gnupg lsb-release
+# Install Docker & Compose plugin
+sudo apt-get update
+sudo apt-get install -y ca-certificates curl gnupg lsb-release
 
 mkdir -p /etc/apt/keyrings
 curl -fsSL https://download.docker.com/linux/ubuntu/gpg \
@@ -14,10 +14,10 @@ echo \
   https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable" \
   > /etc/apt/sources.list.d/docker.list
 
-apt-get update
-apt-get install -y docker-ce docker-ce-cli containerd.io docker-compose-plugin
+sudo apt-get update
+sudo apt-get install -y docker-ce docker-ce-cli containerd.io docker-compose-plugin
 
-# 2) Pull & start the Compose stack
+# Clone & start the Compose stack
 mkdir -p /opt/c8-datalake
 cd /opt/c8-datalake
 
@@ -27,4 +27,4 @@ else
   git -C . pull
 fi
 
-docker compose up -d
+sudo docker compose up -d
