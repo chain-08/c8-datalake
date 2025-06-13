@@ -11,7 +11,6 @@ provider "aws" {
   region = var.region
 }
 
-# Find the latest Ubuntu Jammy AMI
 data "aws_ami" "ubuntu" {
   most_recent = true
   owners      = ["099720109477"]
@@ -22,26 +21,9 @@ data "aws_ami" "ubuntu" {
   }
 }
 
-# Security group for ClickHouse
 resource "aws_security_group" "clickhouse" {
   name        = "c8-clickhouse-sg"
-  description = "Allow ClickHouse ports from your office IP"
-
-  ingress {
-    description = "HTTP interface"
-    from_port   = 8123
-    to_port     = 8123
-    protocol    = "tcp"
-    cidr_blocks = [var.office_cidr]
-  }
-
-  ingress {
-    description = "Native TCP interface"
-    from_port   = 9000
-    to_port     = 9000
-    protocol    = "tcp"
-    cidr_blocks = [var.office_cidr]
-  }
+  description = "Allow SSH & ClickHouse from your office"
 
   ingress {
     description = "SSH"
@@ -50,7 +32,20 @@ resource "aws_security_group" "clickhouse" {
     protocol    = "tcp"
     cidr_blocks = [var.office_cidr]
   }
-
+  ingress {
+    description = "HTTP (8123)"
+    from_port   = 8123
+    to_port     = 8123
+    protocol    = "tcp"
+    cidr_blocks = [var.office_cidr]
+  }
+  ingress {
+    description = "Native TCP (9000)"
+    from_port   = 9000
+    to_port     = 9000
+    protocol    = "tcp"
+    cidr_blocks = [var.office_cidr]
+  }
   egress {
     from_port   = 0
     to_port     = 0
@@ -59,18 +54,20 @@ resource "aws_security_group" "clickhouse" {
   }
 }
 
-
-# EC2 instance running Docker & your Compose stack
 resource "aws_instance" "clickhouse" {
   ami                    = data.aws_ami.ubuntu.id
   instance_type          = var.instance_type
   key_name               = var.key_name
   vpc_security_group_ids = [aws_security_group.clickhouse.id]
 
-  # This is the script that installs Docker & runs docker-compose
   user_data = file("${path.module}/deploy.sh")
 
   tags = {
     Name = "c8-datalake-clickhouse"
   }
+}
+
+output "clickhouse_ip" {
+  description = "Public IP of ClickHouse EC2"
+  value       = aws_instance.clickhouse.public_ip
 }

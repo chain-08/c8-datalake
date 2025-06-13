@@ -1,20 +1,30 @@
 #!/usr/bin/env bash
-set -e
+set -euo pipefail
 
-# Install Docker & Compose plugin
+# Install Docker’s official repo & packages
 apt-get update
 apt-get install -y ca-certificates curl gnupg lsb-release
 mkdir -p /etc/apt/keyrings
 curl -fsSL https://download.docker.com/linux/ubuntu/gpg \
   | gpg --dearmor -o /etc/apt/keyrings/docker.gpg
+
 echo \
   "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.gpg] \
   https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable" \
   > /etc/apt/sources.list.d/docker.list
+
 apt-get update
 apt-get install -y docker-ce docker-ce-cli containerd.io docker-compose-plugin
 
-# Clone & start compose
-mkdir -p /opt/c8-datalake && cd /opt/c8-datalake
-git clone https://github.com/chain-08/c8-datalake.git . || true
+# Pull & start your Compose stack
+mkdir -p /opt/c8-datalake
+cd /opt/c8-datalake
+
+# clone if not present, else pull latest
+if [ ! -d .git ]; then
+  git clone https://github.com/chain-08/c8-datalake.git .
+else
+  git -C . pull
+fi
+
 docker compose up -d

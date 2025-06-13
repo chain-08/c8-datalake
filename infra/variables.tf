@@ -1,26 +1,19 @@
 variable "region" {
-  description = "AWS region to deploy into"
+  description = "AWS region"
   default     = "us-east-1"
 }
 
-variable "office_cidr" {
-  description = "Your office IP/CIDR for SSH & ClickHouse access"
-  type        = string
+variable "instance_type" {
+  description = "EC2 size"
+  default     = "t3.micro"
 }
 
 variable "key_name" {
-  description = "Name of your existing AWS keypair"
+  description = "Name of your existing EC2 keypair"
   type        = string
 }
 
-variable "public_key_path" {
-  description = "Local path to your SSH public key"
+variable "office_cidr" {
+  description = "Your IP/CIDR for SSH and ClickHouse access"
   type        = string
-  default     = "~/.ssh/id_rsa.pub"
-}
-
-variable "instance_type" {
-  description = "EC2 instance type for ClickHouse"
-  type        = string
-  default     = "t3.micro"
 }
