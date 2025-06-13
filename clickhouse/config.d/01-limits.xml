@@ -1,0 +1,9 @@
+<?xml version="1.0"?>
+<clickhouse>
+  <profiles>
+    <default>
+      <!-- cap each query at 10 GB RAM -->
+      <max_memory_usage>10000000000</max_memory_usage>
+    </default>
+  </profiles>
+</clickhouse>

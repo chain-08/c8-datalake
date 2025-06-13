@@ -1,0 +1,5 @@
+<?xml version="1.0"?>
+<clickhouse>
+  <!-- bind HTTP (8123), native TCP (9000), and inter-server HTTP on all IPv4 interfaces -->
+  <listen_host>0.0.0.0</listen_host>
+</clickhouse>

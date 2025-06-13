@@ -1,0 +1,22 @@
+<?xml version="1.0"?>
+<clickhouse>
+  <users>
+    <chain8>
+      <!-- use the Docker secret -->
+      <password_file>/run/secrets/clickhouse_password</password_file>
+      <profile>default</profile>
+      <quota>default</quota>
+      <networks>
+        <ip>::/0</ip>
+      </networks>
+    </chain8>
+  </users>
+  <quotas>
+    <default>
+      <interval>
+        <duration>3600</duration>
+        <queries>0</queries>
+      </interval>
+    </default>
+  </quotas>
+</clickhouse>
