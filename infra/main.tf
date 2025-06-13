@@ -24,7 +24,7 @@ data "aws_ami" "ubuntu" {
 # security group
 resource "aws_security_group" "clickhouse" {
   name        = "c8-clickhouse-sg"
-  description = "Allow SSH & ClickHouse ports from your office"
+  description = "Allow SSH & ClickHouse from your office"
 
   ingress {
     description = "SSH"
@@ -53,6 +53,10 @@ resource "aws_security_group" "clickhouse" {
     to_port     = 0
     protocol    = "-1"
     cidr_blocks = ["0.0.0.0/0"]
+  }
+  lifecycle {
+    create_before_destroy = true
+    ignore_changes = [ description ]
   }
 }
 
