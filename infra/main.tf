@@ -11,6 +11,13 @@ provider "aws" {
   region = var.region
 }
 
+# 1) Import your local public key into AWS as "c8-datalake-key"
+resource "aws_key_pair" "deployer" {
+  key_name   = var.key_name
+  public_key = file(var.public_key_path)
+}
+
+# 2) Latest Ubuntu Jammy AMI
 data "aws_ami" "ubuntu" {
   most_recent = true
   owners      = ["099720109477"]
@@ -21,6 +28,7 @@ data "aws_ami" "ubuntu" {
   }
 }
 
+# 3) Security Group locking to your office IP
 resource "aws_security_group" "clickhouse" {
   name        = "c8-clickhouse-sg"
   description = "Allow SSH & ClickHouse from your office"
@@ -32,6 +40,7 @@ resource "aws_security_group" "clickhouse" {
     protocol    = "tcp"
     cidr_blocks = [var.office_cidr]
   }
+
   ingress {
     description = "HTTP (8123)"
     from_port   = 8123
@@ -39,6 +48,7 @@ resource "aws_security_group" "clickhouse" {
     protocol    = "tcp"
     cidr_blocks = [var.office_cidr]
   }
+
   ingress {
     description = "Native TCP (9000)"
     from_port   = 9000
@@ -46,6 +56,7 @@ resource "aws_security_group" "clickhouse" {
     protocol    = "tcp"
     cidr_blocks = [var.office_cidr]
   }
+
   egress {
     from_port   = 0
     to_port     = 0
@@ -54,12 +65,14 @@ resource "aws_security_group" "clickhouse" {
   }
 }
 
+# 4) EC2 with Docker & your Compose stack via user_data
 resource "aws_instance" "clickhouse" {
   ami                    = data.aws_ami.ubuntu.id
   instance_type          = var.instance_type
-  key_name               = var.key_name
+  key_name               = aws_key_pair.deployer.key_name
   vpc_security_group_ids = [aws_security_group.clickhouse.id]
 
+  # Runs your infra/deploy.sh on first boot:
   user_data = file("${path.module}/deploy.sh")
 
   tags = {
@@ -67,3 +80,8 @@ resource "aws_instance" "clickhouse" {
   }
 }
 
+# 5) Expose the public IP
+output "clickhouse_ip" {
+  description = "Public IP of the ClickHouse EC2 instance"
+  value       = aws_instance.clickhouse.public_ip
+}
