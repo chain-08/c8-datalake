@@ -67,7 +67,3 @@ resource "aws_instance" "clickhouse" {
   }
 }
 
-output "clickhouse_ip" {
-  description = "Public IP of ClickHouse EC2"
-  value       = aws_instance.clickhouse.public_ip
-}
