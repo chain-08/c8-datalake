@@ -11,7 +11,7 @@ provider "aws" {
   region = var.region
 }
 
-# 1) Import your local public key into AWS as "c8-datalake-key"
+# 1) Import your SSH public key into AWS under the name var.key_name
 resource "aws_key_pair" "deployer" {
   key_name   = var.key_name
   public_key = file(var.public_key_path)
@@ -28,7 +28,7 @@ data "aws_ami" "ubuntu" {
   }
 }
 
-# 3) Security Group locking to your office IP
+# 3) Security group for SSH + ClickHouse
 resource "aws_security_group" "clickhouse" {
   name        = "c8-clickhouse-sg"
   description = "Allow SSH & ClickHouse from your office"
@@ -65,18 +65,16 @@ resource "aws_security_group" "clickhouse" {
   }
 }
 
-# 4) EC2 with Docker & your Compose stack via user_data
+# 4) EC2 instance that runs your deploy.sh on first boot
 resource "aws_instance" "clickhouse" {
   ami                    = data.aws_ami.ubuntu.id
   instance_type          = var.instance_type
   key_name               = aws_key_pair.deployer.key_name
   vpc_security_group_ids = [aws_security_group.clickhouse.id]
 
-  # Runs your infra/deploy.sh on first boot:
   user_data = file("${path.module}/deploy.sh")
 
   tags = {
     Name = "c8-datalake-clickhouse"
   }
 }
-
