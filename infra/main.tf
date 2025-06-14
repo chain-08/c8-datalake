@@ -63,13 +63,13 @@ resource "aws_security_group" "clickhouse" {
 # EC2 instance
 resource "aws_instance" "clickhouse" {
   ami                    = data.aws_ami.ubuntu.id
-  instance_type          = var.instance_type
+  instance_type          = "t2.micro"  # ✅ updated from variable to hard-coded t2.micro for free tier
   key_name               = var.key_name
   vpc_security_group_ids = [aws_security_group.clickhouse.id]
 
   user_data = templatefile("${path.module}/deploy.sh.tftpl", {
-  # no variables needed anymore
-})
+    # no variables needed anymore
+  })
 
   tags = {
     Name = "c8-datalake-clickhouse"
