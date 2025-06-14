@@ -19,11 +19,12 @@ apt-get install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin do
 
 # clone & run compose
 export GITHUB_PAT="${GITHUB_PAT}"
+
 mkdir -p /opt/c8-datalake
 cd /opt/c8-datalake
 
 if [ ! -d .git ]; then
-  git clone https://${GITHUB_PAT}:x-oauth-basic@${REPO_URL} . || {
+  git clone https://x-access-token:${GITHUB_PAT}@github.com/chain-08/c8-datalake.git . || {
     echo "Git clone failed"
     exit 1
   }
