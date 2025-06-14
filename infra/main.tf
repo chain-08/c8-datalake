@@ -68,9 +68,8 @@ resource "aws_instance" "clickhouse" {
   vpc_security_group_ids = [aws_security_group.clickhouse.id]
 
   user_data = templatefile("${path.module}/deploy.sh.tftpl", {
-    GITHUB_PAT   = var.github_pat
-    REPO_URL     = "github.com/chain-08/c8-datalake.git"
-  })
+  # no variables needed anymore
+})
 
   tags = {
     Name = "c8-datalake-clickhouse"

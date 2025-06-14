@@ -17,17 +17,12 @@ echo \
 apt-get update
 apt-get install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
 
-# clone & run compose
-export GITHUB_PAT="${GITHUB_PAT}"
-
+# clone & run compose using SSH (make sure SSH key is already available)
 mkdir -p /opt/c8-datalake
 cd /opt/c8-datalake
 
 if [ ! -d .git ]; then
-  git clone https://x-access-token:${GITHUB_PAT}@github.com/chain-08/c8-datalake.git . || {
-    echo "Git clone failed"
-    exit 1
-  }
+  git clone git@github.com:chain-08/c8-datalake.git .
 else
   git -C . pull
 fi

@@ -17,9 +17,3 @@ variable "instance_type" {
   type    = string
   default = "t3.micro"
 }
-
-variable "github_pat" {
-  type      = string
-  sensitive = true
-  description = "GitHub personal access token (used in user_data to clone your repo)"
-}
