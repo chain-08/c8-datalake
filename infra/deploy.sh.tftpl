@@ -23,7 +23,10 @@ mkdir -p /opt/c8-datalake
 cd /opt/c8-datalake
 
 if [ ! -d .git ]; then
-  git clone https://${GITHUB_PAT}@${REPO_URL} .
+  git clone https://${GITHUB_PAT}:x-oauth-basic@${REPO_URL} . || {
+    echo "Git clone failed"
+    exit 1
+  }
 else
   git -C . pull
 fi
