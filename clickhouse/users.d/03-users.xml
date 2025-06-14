@@ -2,20 +2,28 @@
 <clickhouse>
   <users>
     <chain8>
-      <!-- use the Docker secret -->
-      <password_file>/run/secrets/clickhouse_password</password_file>
+      <password>c8_2025</password> <!-- Direct password -->
       <profile>default</profile>
       <quota>default</quota>
       <networks>
-        <ip>::/0</ip>
+        <ip>::/0</ip> <!-- Allow connections from all IPs -->
       </networks>
     </chain8>
   </users>
+
+  <profiles>
+    <default>
+      <max_memory_usage>10000000000</max_memory_usage>
+      <use_uncompressed_cache>1</use_uncompressed_cache>
+      <load_balancing>random</load_balancing>
+    </default>
+  </profiles>
+
   <quotas>
     <default>
       <interval>
         <duration>3600</duration>
-        <queries>0</queries>
+        <queries>0</queries> <!-- 0 = unlimited -->
       </interval>
     </default>
   </quotas>
