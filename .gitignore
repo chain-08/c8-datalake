@@ -1,9 +1,24 @@
-# Terraform state
+# Terraform state and sensitive files
 infra/.terraform/
 infra/terraform.tfstate*
-infra/terraform.tfstate
-infra/terraform.tfstate.backup
-infra/.terraform/
-bfg.jar
+infra/terraform.tfvars
 terraform.tfvars
 
+# Docker secrets
+.env
+secrets/clickhouse_password.txt
+
+# Logs and cache
+*.log
+*.tmp
+*.bak
+*.swp
+__pycache__/
+*.pyc
+*.zip
+
+# OS files
+.DS_Store
+
+# Java tooling
+bfg.jar

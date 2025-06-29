@@ -1,3 +1,5 @@
+version: '3.8'
+
 services:
   clickhouse:
     image: clickhouse/clickhouse-server:23.8
@@ -13,27 +15,15 @@ services:
       - ./clickhouse/users.d:/etc/clickhouse-server/users.d:ro
       - ./init:/docker-entrypoint-initdb.d:ro
     healthcheck:
-      test:
-        - CMD
-        - wget
-        - --no-verbose
-        - --tries=1
-        - --spider
-        - http://localhost:8123/ping
+      test: ["CMD", "wget", "--spider", "-q", "http://localhost:8123/ping"]
       interval: 30s
       timeout: 10s
       retries: 5
       start_period: 30s
-    logging:
-      driver: awslogs
-      options:
-        awslogs-region: us-east-1
-        awslogs-group: /docker/containers/clickhouse
-        awslogs-stream: clickhouse-datalake
+
+volumes:
+  clickhouse_data:
 
 secrets:
   clickhouse_password:
     file: ./secrets/clickhouse_password.txt
-
-volumes:
-  clickhouse_data:
