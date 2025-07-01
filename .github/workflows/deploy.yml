@@ -3,7 +3,7 @@ name: Deploy to EC2
 on:
   push:
     branches:
-      - master
+      - main   # or 'master' based on your repo
 
 jobs:
   deploy:
@@ -16,76 +16,31 @@ jobs:
     - name: Deploy to EC2
       uses: appleboy/ssh-action@master
       with:
-        host: 54.234.38.203
+        host: ${{ secrets.HOST }}
         username: ubuntu
-        key: |
-          -----BEGIN OPENSSH PRIVATE KEY-----
-          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
-          -----END OPENSSH PRIVATE KEY-----
+        key: ${{ secrets.SSH_KEY }}
         script: |
-          cd /opt/c8-datalake
-          echo "Pulling latest changes..."
-          git pull origin master
+          set -e
+          echo "🔗 SSH connected successfully!"
 
-          echo "Stopping Docker..."
+          cd /opt/c8-datalake || { echo "❌ Directory not found!"; exit 1; }
+
+          echo "🔄 Pulling latest code..."
+          git pull origin main
+
+          echo "🛑 Stopping Docker..."
           sudo docker compose down
 
-          echo "Pruning Docker..."
+          echo "🧹 Pruning Docker..."
           sudo docker system prune -af --volumes
 
-          echo "Rebuilding Docker containers..."
+          echo "🚀 Rebuilding Docker containers..."
           sudo docker compose up -d --build
 
-          echo "Uploading logs..."
+          echo "☁️ Uploading logs..."
           bash upload-logs.sh
 
-          echo "Cleaning system..."
+          echo "🧽 Cleaning system..."
           bash clean-docker.sh
 
-          echo "✅ Deployment Complete"
+          echo "✅ Deployment finished successfully."
