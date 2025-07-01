@@ -3,7 +3,7 @@ name: Deploy to EC2
 on:
   push:
     branches:
-      - master   # 🔥 or 'main' based on your repo branch
+      - master  # 🔥 Change to 'main' if needed
 
 jobs:
   deploy:
@@ -13,11 +13,12 @@ jobs:
     - name: Checkout repository
       uses: actions/checkout@v3
 
-    - name: Test SSH Connection (Debug Step)
+    - name: Test SSH Connection
       run: |
         echo "${{ secrets.EC2_SSH_KEY }}" > key.pem
         chmod 600 key.pem
         ssh -o StrictHostKeyChecking=no -i key.pem ubuntu@${{ secrets.EC2_HOST }} "echo '✅ SSH Connection Successful'" || (echo "❌ SSH Connection Failed" && exit 1)
+        rm -f key.pem
 
     - name: Deploy to EC2
       uses: appleboy/ssh-action@master
@@ -40,10 +41,16 @@ jobs:
           git pull origin master
 
           echo "🛑 Stopping Docker containers..."
-          sudo docker compose down
+          sudo docker compose down || true
 
           echo "🧽 Pruning Docker resources..."
           sudo docker system prune -af --volumes
+
+          echo "🛠️ Setting permissions for EBS mount..."
+          sudo mkdir -p /mnt/clickhouse-data
+          sudo chown -R 101:101 /mnt/clickhouse-data
+          sudo chmod 775 /mnt/clickhouse-data
+          echo "✅ Permissions set for /mnt/clickhouse-data"
 
           echo "🚀 Building and starting Docker containers..."
           sudo docker compose up -d --build
