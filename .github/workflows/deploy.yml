@@ -3,7 +3,7 @@ name: Deploy to EC2
 on:
   push:
     branches:
-      - master   # 🔥 Or 'main' if your repo uses main
+      - master   # 🔥 or 'main' based on your repo branch
 
 jobs:
   deploy:
@@ -31,7 +31,7 @@ jobs:
 
           cd /opt/c8-datalake
 
-          echo "🧹 Cleaning local repo changes..."
+          echo "🧹 Cleaning local repo changes and untracked files..."
           git fetch origin
           git reset --hard origin/master
           git clean -fd
@@ -49,9 +49,9 @@ jobs:
           sudo docker compose up -d --build
 
           echo "☁️ Uploading logs..."
-          bash upload-logs.sh
+          sudo bash upload-logs.sh
 
           echo "🧹 Cleaning system..."
-          bash clean-docker.sh
+          sudo bash clean-docker.sh
 
           echo "✅ Deployment Complete 🚀"
