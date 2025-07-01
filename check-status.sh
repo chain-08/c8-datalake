@@ -36,10 +36,10 @@ fi
 # Check Docker Containers
 # --------------------------
 echo "🐳 Docker containers status:"
-docker ps --format "table {{.Names}}\t{{.Status}}\t{{.Ports}}"
+sudo docker ps --format "table {{.Names}}\t{{.Status}}\t{{.Ports}}"
 
 # Check if clickhouse container is running
-if docker ps --format '{{.Names}}' | grep -q "clickhouse-datalake"; then
+if sudo docker ps --format '{{.Names}}' | grep -q "clickhouse-datalake"; then
   echo "✅ ClickHouse container is running."
 else
   echo "❌ ClickHouse container is NOT running."
