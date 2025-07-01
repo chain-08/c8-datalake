@@ -3,7 +3,7 @@ name: Deploy to EC2
 on:
   push:
     branches:
-      - master   # or 'main' based on your repo
+      - master  # or 'main' based on your repo
 
 jobs:
   deploy:
@@ -13,20 +13,26 @@ jobs:
     - name: Checkout repository
       uses: actions/checkout@v3
 
+    - name: Test SSH Connection (Debug Step)
+      run: |
+        echo "${{ secrets.EC2_SSH_KEY }}" > key.pem
+        chmod 600 key.pem
+        ssh -o StrictHostKeyChecking=no -i key.pem ubuntu@${{ secrets.EC2_HOST }} "echo '✅ SSH Connection Successful'" || (echo "❌ SSH Connection Failed" && exit 1)
+
     - name: Deploy to EC2
       uses: appleboy/ssh-action@master
       with:
-        host: ${{ secrets.HOST }}
+        host: ${{ secrets.EC2_HOST }}
         username: ubuntu
-        key: ${{ secrets.SSH_KEY }}
+        key: ${{ secrets.EC2_SSH_KEY }}
         script: |
           set -e
-          echo "🔗 SSH connected successfully!"
+          echo "🔗 SSH connected successfully."
 
           cd /opt/c8-datalake || { echo "❌ Directory not found!"; exit 1; }
 
           echo "🔄 Pulling latest code..."
-          git pull origin main
+          git pull origin master
 
           echo "🛑 Stopping Docker..."
           sudo docker compose down
