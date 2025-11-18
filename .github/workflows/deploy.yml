@@ -3,62 +3,72 @@ name: Deploy to EC2
 on:
   push:
     branches:
-      - master  # 🔥 Change to 'main' if needed
+      - master  # change if your default branch is different
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Checkout repository
-      uses: actions/checkout@v3
+      - name: Checkout repository
+        uses: actions/checkout@v3
 
-    - name: Test SSH Connection
-      run: |
-        echo "${{ secrets.EC2_SSH_KEY }}" > key.pem
-        chmod 600 key.pem
-        ssh -o StrictHostKeyChecking=no -i key.pem ubuntu@${{ secrets.EC2_HOST }} "echo '✅ SSH Connection Successful'" || (echo "❌ SSH Connection Failed" && exit 1)
-        rm -f key.pem
+      - name: Test SSH Connection
+        env:
+          EC2_SSH_KEY: ${{ secrets.EC2_SSH_KEY }}
+          EC2_HOST: ${{ secrets.EC2_HOST }}
+        run: |
+          # Write private key to file safely
+          printf '%s\n' "$EC2_SSH_KEY" > key.pem
+          chmod 600 key.pem
 
-    - name: Deploy to EC2
-      uses: appleboy/ssh-action@master
-      with:
-        host: ${{ secrets.EC2_HOST }}
-        username: ubuntu
-        key: ${{ secrets.EC2_SSH_KEY }}
-        script: |
-          set -e
-          echo "🔗 SSH connected successfully."
+          # Test SSH into EC2
+          ssh -o StrictHostKeyChecking=no -i key.pem ubuntu@"$EC2_HOST" "echo '✅ SSH Connection Successful'" \
+            || (echo "❌ SSH Connection Failed" && exit 1)
 
-          cd /opt/c8-datalake
+          # Clean up
+          rm -f key.pem
 
-          echo "🧹 Cleaning local repo changes and untracked files..."
-          git fetch origin
-          git reset --hard origin/master
-          git clean -fd
+      - name: Deploy to EC2
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ubuntu
+          key: ${{ secrets.EC2_SSH_KEY }}
+          script: |
+            set -euo pipefail
 
-          echo "🔄 Pulling latest code..."
-          git pull origin master
+            echo "🔗 SSH connected successfully."
 
-          echo "🛑 Stopping Docker containers..."
-          sudo docker compose down || true
+            cd /opt/c8-datalake
 
-          echo "🧽 Pruning Docker resources..."
-          sudo docker system prune -af --volumes
+            echo "🧹 Cleaning local repo changes and untracked files..."
+            git fetch origin
+            git reset --hard origin/master
+            git clean -fd
 
-          echo "🛠️ Setting permissions for EBS mount..."
-          sudo mkdir -p /mnt/clickhouse-data
-          sudo chown -R 101:101 /mnt/clickhouse-data
-          sudo chmod 775 /mnt/clickhouse-data
-          echo "✅ Permissions set for /mnt/clickhouse-data"
+            echo "🔄 Pulling latest code..."
+            git pull origin master
 
-          echo "🚀 Building and starting Docker containers..."
-          sudo docker compose up -d --build
+            echo "🛑 Stopping Docker containers..."
+            sudo docker compose down || true
 
-          echo "☁️ Uploading logs..."
-          sudo bash upload-logs.sh
+            echo "🧽 Pruning Docker resources..."
+            sudo docker system prune -af --volumes
 
-          echo "🧹 Cleaning system..."
-          sudo bash clean-docker.sh
+            echo "🛠️ Setting permissions for EBS mount..."
+            sudo mkdir -p /mnt/clickhouse-data
+            sudo chown -R 101:101 /mnt/clickhouse-data
+            sudo chmod 775 /mnt/clickhouse-data
+            echo "✅ Permissions set for /mnt/clickhouse-data"
 
-          echo "✅ Deployment Complete 🚀"
+            echo "🚀 Building and starting Docker containers..."
+            sudo docker compose up -d --build
+
+            echo "☁️ Uploading logs..."
+            sudo bash upload-logs.sh
+
+            echo "🧹 Cleaning system..."
+            sudo bash clean-docker.sh
+
+            echo "✅ Deployment Complete 🚀"
